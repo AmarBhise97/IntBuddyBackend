@@ -40,13 +40,13 @@ public class UserService {
 	
 	
 	
-	@Autowired
-	private Otpservice service;
-	
-	
-	boolean flag=false;
-	
-	 String otp2;
+//	@Autowired
+//	private Otpservice service;
+//	
+//	
+//	boolean flag=false;
+//	
+//	 String otp2;
 
 	// Create user
 	public UserEntity createUser(UserEntity user) throws Exception {
