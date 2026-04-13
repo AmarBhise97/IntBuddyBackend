@@ -16,11 +16,10 @@ public class EmailService {
     public void experiencemail(String toEmail, String name) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-<<<<<<< HEAD
+
             message.setFrom("bhiseamarwagholi@gmail.com");
-=======
             message.setFrom("malusarenamrata88@gmail.com");
->>>>>>> 24a5c1f77a52fcd8772aef82772e0f4b98414a6f
+
             message.setTo(toEmail);
             message.setSubject("Experience Added Successfully..!");
 
@@ -34,18 +33,18 @@ public class EmailService {
 
             mailSender.send(message);
 
-<<<<<<< HEAD
-        }catch (Exception e) {
+
+        }catch (RuntimeException e) {
             throw new RuntimeException("Mail failed: " + e.getMessage(), e);
-=======
+
         } catch (Exception e) {
             e.printStackTrace();
->>>>>>> 24a5c1f77a52fcd8772aef82772e0f4b98414a6f
+
         }
     }
     
     public void Otpemail(String toEmail, String otp) {
-<<<<<<< HEAD
+
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -61,7 +60,7 @@ public class EmailService {
     }    
     
     //After Registration
-    public void RegistrationEmail(String toEmail, String name) {
+    public void RegistrationEmail(String toEmail, String name,String otp) {
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -106,17 +105,17 @@ public class EmailService {
         } catch (Exception e) {
             throw new RuntimeException("Mail failed: " + e.getMessage(), e);
         }
-        }
-    }
+        
+    
 
-=======
+
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("malusarenamrata88@gmail.com");
+            message. setFrom("bhiseamarwagholi@gmail.com");
             message.setTo(toEmail);
             message.setSubject("Regarding to Your OTP Code ");
-            message.setText("Opt is "+otp+"  OTP is valid for only 5 Minute...!");
+            message.setText("Opt is "+otp +"  OTP is valid for only 5 Minute...!");
             mailSender.send(message);
 
         } catch (Exception e) {
@@ -125,51 +124,53 @@ public class EmailService {
     }    
     
     //After Registration
-    public void RegistrationEmail(String toEmail, String name) {
-
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            helper.setFrom("malusarenamrata88@gmail.com");
-            helper.setTo(toEmail);
-            helper.setSubject("Welcome to IntBuddy...!");
-
-            String htmlContent =
-                    "<html>" +
-                    "<body style='font-family: Arial; background-color:#f4f4f4; padding:20px;'>" +
-                    "<div style='max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:10px;'>" +
-
-                    "<h2 style='color:#4CAF50; text-align:center;'>Welcome to IntBuddy...!</h2>" +
-
-                    "<p>Hello <b>" + name + "</b>,</p>" +
-
-                    "<p>Your registration is <b>Successful</b>!</p>" +
-
-                    "<p>We are excited to have you on board.</p>" +
-
-                    "<div style='text-align:center; margin:20px;'>" +
-                    "<a href='#' style='background:#4CAF50; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Login</a>" +
-                    "</div>" +
-
-                    "<p>Happy Interview Preparation! </p>" +
-
-                    "<p>Regards,<br><b>Team IntBuddy</b></p>" +
-
-                    "<hr>" +
-                    "<p style='font-size:12px; text-align:center; color:gray;'>© malusarenamrata88@gmail.com</p>" +
-
-                    "</div>" +
-                    "</body>" +
-                    "</html>";
-
-            helper.setText(htmlContent, true); 
-
-            mailSender.send(message);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//    public void RegistrationEmail1(String toEmail, String name) {
+//
+//        try {
+//            MimeMessage message = mailSender.createMimeMessage();
+//            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+//
+//            helper.setFrom("malusarenamrata88@gmail.com");
+//            helper.setTo(toEmail);
+//            helper.setSubject("Welcome to IntBuddy...!");
+//
+//            String htmlContent =
+//                    "<html>" +
+//                    "<body style='font-family: Arial; background-color:#f4f4f4; padding:20px;'>" +
+//                    "<div style='max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:10px;'>" +
+//
+//                    "<h2 style='color:#4CAF50; text-align:center;'>Welcome to IntBuddy...!</h2>" +
+//
+//                    "<p>Hello <b>" + name + "</b>,</p>" +
+//
+//                    "<p>Your registration is <b>Successful</b>!</p>" +
+//
+//                    "<p>We are excited to have you on board.</p>" +
+//
+//                    "<div style='text-align:center; margin:20px;'>" +
+//                    "<a href='#' style='background:#4CAF50; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Login</a>" +
+//                    "</div>" +
+//
+//                    "<p>Happy Interview Preparation! </p>" +
+//
+//                    "<p>Regards,<br><b>Team IntBuddy</b></p>" +
+//
+//                    "<hr>" +
+//                    "<p style='font-size:12px; text-align:center; color:gray;'>© malusarenamrata88@gmail.com</p>" +
+//
+//                    "</div>" +
+//                    "</body>" +
+//                    "</html>";
+//
+//            helper.setText(htmlContent, true); 
+//
+//            mailSender.send(message);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    
+//    
+//}
     }
-}
->>>>>>> 24a5c1f77a52fcd8772aef82772e0f4b98414a6f
+

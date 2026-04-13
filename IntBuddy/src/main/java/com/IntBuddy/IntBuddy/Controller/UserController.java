@@ -48,7 +48,7 @@ public class UserController implements Serializable{
 
 	        System.out.println("STEP 2: Calling email");
 
-	        emailService.RegistrationEmail(newUser.getEmail(), newUser.getName());
+	        emailService.RegistrationEmail(newUser.getEmail(), newUser.getName(),newUser.getOtp());
 
 	        System.out.println("STEP 3: Email sent");
 
@@ -96,19 +96,19 @@ public class UserController implements Serializable{
 	        return service.updateUserEntity(id, user);
 	    }
 	    
-	    @PostMapping("/enterphone/{phone}")
-	    public String verfyotp(@RequestParam(value="phone") String phone)
-	    {
-	    	return service.verifyOtp(phone);
-	    	
-	    }
-	    
-	    
-        @PostMapping("/verifyotp/{otp}")
-        public boolean veri(@RequestParam(value="otp") String otp)
-        {
-        	
-        	return service.verifyOtp2(otp);
-        }
-
+//	    @PostMapping("/enterphone/{phone}")
+//	    public String verfyotp(@RequestParam(value="phone") String phone)
+//	    {
+//	    	return service.verifyOtp(phone);
+//	    	
+//	    }
+//	    
+//	    
+//        @PostMapping("/verifyotp/{otp}")
+//        public boolean veri(@RequestParam(value="otp") String otp)
+//        {
+//        	
+//        	return service.verifyOtp2(otp);
+//        }
+//
 	}

@@ -39,6 +39,8 @@ public class UserEntity implements Serializable {
 	private String phoneno;
 
 	private String password;
+	
+	private String otp;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -145,6 +147,14 @@ public class UserEntity implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
 	}
 
 	

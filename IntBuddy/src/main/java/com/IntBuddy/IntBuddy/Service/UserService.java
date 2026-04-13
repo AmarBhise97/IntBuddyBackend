@@ -151,24 +151,24 @@ public class UserService {
 	
 	
 
-	public String verifyOtp(@PathVariable(value="phone") String phone)
-	{
-		
-		otp2= service.sendOtp(phone);
-		
-		return otp2;
-	}
-	
-	
-	
-	
-	
-	public boolean verifyOtp2(@PathVariable(value="otp") String otp)
-	{
-		
-		flag=otp2.equals(otp);
-		
-		return flag;
-	}
+//	public String verifyOtp(@PathVariable(value="phone") String phone)
+//	{
+//		
+//		otp2= service.sendOtp(phone);
+//		
+//		return otp2;
+//	}
+//	
+//	
+//	
+//	
+//	
+//	public boolean verifyOtp2(@PathVariable(value="otp") String otp)
+//	{
+//		
+//		flag=otp2.equals(otp);
+//		
+//		return flag;
+//	}
 
 }
