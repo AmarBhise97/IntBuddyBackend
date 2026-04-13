@@ -51,7 +51,7 @@ public class ExperianceController implements Serializable {
 	// ADD experience
 	@PostMapping("/add")
 	@CacheEvict(value = "experiance", allEntries = true)
-<<<<<<< HEAD
+ 
 	public ExperianceEntity addExperiance(@RequestBody ExperianceEntity exp) throws Exception {
 		
 		    ExperianceEntity saved = service.addExperiance(exp);
@@ -65,8 +65,7 @@ public class ExperianceController implements Serializable {
 		    return saved;
 		}
 	
-=======
-	public ExperianceEntity addExperiance(@RequestBody ExperianceEntity exp) {
+	public ExperianceEntity addExperiance1(@RequestBody ExperianceEntity exp) {
 		ExperianceEntity saved = service.addExperiance(exp);
 		 UserEntity user = saved.getUser();
 
@@ -75,7 +74,7 @@ public class ExperianceController implements Serializable {
 
 		return saved;
 	}
->>>>>>> 24a5c1f77a52fcd8772aef82772e0f4b98414a6f
+
 
 	@GetMapping("/getexperiance")
 	@Cacheable(value = "experiance", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
