@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.IntBuddy.IntBuddy.DTO.ExperianceDTO;
 import com.IntBuddy.IntBuddy.Entity.ExperianceEntity;
+import com.IntBuddy.IntBuddy.Entity.UserEntity;
+import com.IntBuddy.IntBuddy.Service.EmailService;
 import com.IntBuddy.IntBuddy.Service.ExperianceService;
 
 @RestController
@@ -37,7 +39,8 @@ public class ExperianceController implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+	@Autowired
+    private EmailService emailService;
 	@Autowired
 	private ExperianceService service;
 
@@ -46,6 +49,11 @@ public class ExperianceController implements Serializable {
 	@CacheEvict(value = "experiance", allEntries = true)
 	public ExperianceEntity addExperiance(@RequestBody ExperianceEntity exp) {
 		ExperianceEntity saved = service.addExperiance(exp);
+		 UserEntity user = saved.getUser();
+
+	        // Send email using user's email and name
+	        emailService.experiencemail(user.getEmail(), user.getName());
+
 		return saved;
 	}
 
