@@ -26,28 +26,44 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.IntBuddy.IntBuddy.DTO.ExperianceDTO;
+import com.IntBuddy.IntBuddy.DTO.UserDTO;
 import com.IntBuddy.IntBuddy.Entity.ExperianceEntity;
+import com.IntBuddy.IntBuddy.Entity.UserEntity;
+import com.IntBuddy.IntBuddy.Service.EmailService;
 import com.IntBuddy.IntBuddy.Service.ExperianceService;
+import com.IntBuddy.IntBuddy.Service.UserService;
 
 @RestController
 @RequestMapping("/Experiance")
 public class ExperianceController implements Serializable {
-
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+	@Autowired
+    private EmailService emailService;
 	@Autowired
 	private ExperianceService service;
+	@Autowired
+	private UserService serv;
 
 	// ADD experience
 	@PostMapping("/add")
 	@CacheEvict(value = "experiance", allEntries = true)
-	public ExperianceEntity addExperiance(@RequestBody ExperianceEntity exp) {
-		ExperianceEntity saved = service.addExperiance(exp);
-		return saved;
-	}
+	public ExperianceEntity addExperiance(@RequestBody ExperianceEntity exp) throws Exception {
+		
+		    ExperianceEntity saved = service.addExperiance(exp);
+
+		    Long userId = saved.getUser().getId();
+
+		    UserDTO user = serv.getUserById(userId); // fetch full user
+
+		    emailService.experiencemail(user.getEmail(), user.getName());
+
+		    return saved;
+		}
+	
 
 	@GetMapping("/getexperiance")
 	@Cacheable(value = "experiance", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
@@ -113,6 +129,7 @@ public class ExperianceController implements Serializable {
 	public ExperianceDTO getExperianceId(@PathVariable("id") Long experiance_ID) throws Exception {
 
 		return service.getEnperianceid(experiance_ID);
+		
 	}
 
 	@PutMapping("/updateecperiance/{id}")
@@ -129,4 +146,5 @@ public class ExperianceController implements Serializable {
 
 		return "delete succesfully  " + service.deleteExperiance(experiance_ID);
 	}
+
 }

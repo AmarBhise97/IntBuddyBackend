@@ -39,11 +39,26 @@ public class UserController implements Serializable{
 	    // CREATE
 	    @PostMapping("/register")
 	    @CacheEvict(value = "user", allEntries = true)
-	    public UserEntity createUser(@RequestBody UserEntity user) {
+	
+	    public UserEntity createUser(@RequestBody UserEntity user) throws Exception {
+
+	        System.out.println("STEP 1: Saving user");
+
 	        UserEntity newUser = service.createUser(user);
+
+	        System.out.println("STEP 2: Calling email");
+
 	        emailService.RegistrationEmail(newUser.getEmail(), newUser.getName());
+
+	        System.out.println("STEP 3: Email sent");
+
 	        return newUser;
 	    }
+//	    public UserEntity createUser(@RequestBody UserEntity user) {
+//	        UserEntity newUser = service.createUser(user);
+//	        emailService.RegistrationEmail(newUser.getEmail(), newUser.getName());
+//	        return newUser;
+//	    }
 
 	    // GET ALL
 	    @GetMapping("/get")
@@ -80,4 +95,20 @@ public class UserController implements Serializable{
 	    public UserEntity updateUser(@PathVariable Long id, @RequestBody UserEntity user) {
 	        return service.updateUserEntity(id, user);
 	    }
+	    
+	    @PostMapping("/enterphone/{phone}")
+	    public String verfyotp(@RequestParam(value="phone") String phone)
+	    {
+	    	return service.verifyOtp(phone);
+	    	
+	    }
+	    
+	    
+        @PostMapping("/verifyotp/{otp}")
+        public boolean veri(@RequestParam(value="otp") String otp)
+        {
+        	
+        	return service.verifyOtp2(otp);
+        }
+
 	}

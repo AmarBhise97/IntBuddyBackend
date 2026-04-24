@@ -9,7 +9,10 @@ import org.springframework.cache.annotation.EnableCaching;
 public class IntBuddyApplication {
 
 	public static void main(String[] args) {
+		
 		SpringApplication.run(IntBuddyApplication.class, args);
+		
+		
 	}
 
 }

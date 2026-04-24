@@ -99,6 +99,7 @@ public class UserEntity implements Serializable {
 	}
 
 	public void setExperiance(List<ExperianceEntity> experiance) {
+		
 		this.experiance = experiance;
 	}
 
