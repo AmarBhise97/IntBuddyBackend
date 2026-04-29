@@ -2,27 +2,23 @@ package com.IntBuddy.IntBuddy.DTO;
 
 import java.io.Serializable;
 
-public class CommentDTO  implements Serializable{
-	
+public class CommentDTO implements Serializable {
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private Long comment_id;
-	
-	private String content;
-	
-	private Long id;
-	
-    private String name;
-	
-	private String email;
-	
-	
-	
 
-	
+	private Long comment_id;
+
+	private String content;
+
+	private Long id;
+
+	private String fullName;
+
+	private String email;
+
 	public Long getId() {
 		return id;
 	}
@@ -47,12 +43,16 @@ public class CommentDTO  implements Serializable{
 		this.comment_id = comment_id;
 	}
 
-	public String getName() {
-		return name;
+	public String getFullName() {
+		return fullName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
 	public String getEmail() {
@@ -62,7 +62,5 @@ public class CommentDTO  implements Serializable{
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
-	
 
 }

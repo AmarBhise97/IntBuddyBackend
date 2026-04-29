@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.IntBuddy.IntBuddy.DTO.CommentDTO;
 import com.IntBuddy.IntBuddy.Entity.CommentEntity;
+import com.IntBuddy.IntBuddy.Exception.DataisEmptyException;
 import com.IntBuddy.IntBuddy.Service.CommentService;
 
 @RestController
@@ -42,7 +43,7 @@ public class CommentController implements Serializable {
 		this.service = service;
 	}
 
-	// ADD comment
+	// ADD Comment
 	@PostMapping("/addComent")
 	@CacheEvict(value = "comment", allEntries = true)
 	public CommentEntity addComment(@RequestBody CommentEntity comment) {
@@ -50,80 +51,98 @@ public class CommentController implements Serializable {
 		return saved;
 	}
 
+	// Search Comment
 	@GetMapping("/comments/search")
 	@Cacheable(value = "comment", key = "#content + '-' + #page + '-' + #size + '-' + #sortBy + '-' + #direction")
 	public List<CommentDTO> searchComments(@RequestParam String content, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "content") String sortBy,
-			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException {
+			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException, DataisEmptyException {
 
-		// clean input
-		Thread.sleep(5000);
 		content = content.trim();
 
-		// validate sort field
 		List<String> allowed = List.of("comment_id", "content");
 		if (!allowed.contains(sortBy)) {
 			sortBy = "content";
 		}
 
-		// sorting
 		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
 		Pageable pageable = PageRequest.of(page, size, sort);
 
 		Page<CommentDTO> pageData = service.searchComments(content, pageable);
 
-		return pageData.getContent(); // returns empty list if no data
+		if (pageData.isEmpty()) {
+			throw new DataisEmptyException("No comments found for: " + content);
+		}
+
+		return pageData.getContent();
 	}
 
-	// Get all comment
+	// Get All Comment
 	@GetMapping("/getallcomment")
 	@Cacheable(value = "comment", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
-	public List<CommentDTO> getAllComments(
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "5") int size,
-	        @RequestParam(defaultValue = "content") String sortBy,
-	        @RequestParam(defaultValue = "asc") String direction) throws InterruptedException {
+	public List<CommentDTO> getAllComments(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "content") String sortBy,
+			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException, DataisEmptyException {
 
-	    Thread.sleep(5000);
+		Thread.sleep(5000);
 
-	    // validate sort field
-	    List<String> allowed = List.of("comment_id", "content");
-	    if (!allowed.contains(sortBy)) {
-	        sortBy = "comment_id";
-	    }
+		List<String> allowed = List.of("comment_id", "content");
+		if (!allowed.contains(sortBy)) {
+			sortBy = "comment_id";
+		}
 
-	    Sort sort = direction.equalsIgnoreCase("desc")
-	            ? Sort.by(sortBy).descending()
-	            : Sort.by(sortBy).ascending();
+		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
-	    Pageable pageable = PageRequest.of(page, size, sort);
+		Pageable pageable = PageRequest.of(page, size, sort);
 
-	    Page<CommentDTO> pageData = service.getAllComment(pageable);
+		Page<CommentDTO> pageData = service.getAllComment(pageable);
 
-	    return pageData.getContent(); // empty list if no data
+		if (pageData.isEmpty()) {
+			throw new DataisEmptyException("No comments Present");
+		}
+
+		return pageData.getContent(); // empty list if no data
 	}
 
+	// Get Comment ID
 	@GetMapping("/getCommentId/{id}")
 	@Cacheable(value = "comment", key = "#comment_id")
 	public CommentDTO getCommentId(@PathVariable("id") Long comment_id) throws Exception {
-		Thread.sleep(5000);
-		return service.getCommentbyid(comment_id);
+		CommentDTO comment = service.getCommentbyid(comment_id);
+
+		if (comment == null) {
+			throw new DataisEmptyException("Comment not Present with id: " + comment_id);
+		}
+
+		return comment;
 	}
 
-	// UPDATE comment
+	// Update Comment
 	@PutMapping("/updateComment/{id}")
 	@CachePut(value = "comment", key = "#comment_id")
 	public CommentDTO updateComment(@PathVariable("id") Long comment_id, @RequestBody CommentDTO comment)
 			throws Exception {
-        Thread.sleep(5000);
-		return service.updateComment(comment_id, comment);
+		CommentDTO updated = service.updateComment(comment_id, comment);
+
+		if (updated == null) {
+			throw new DataisEmptyException(
+					"Comment or User not Present. Comment id: " + comment_id + ", User id: " + comment.getId());
+		}
+
+		return updated;
 	}
 
-	// DELETE comment
+	// Delete Comment
 	@DeleteMapping("/deletComment/{id}")
 	@CacheEvict(value = "comment", key = "#commnet_id")
-	public String deleteComment(@PathVariable("id") Long commnet_id) {
-		return " delete succesfully  " + service.deleteComment(commnet_id);
+	public String deleteComment(@PathVariable("id") Long commnet_id) throws DataisEmptyException {
+		boolean deleted = service.deleteComment(commnet_id);
+
+		if (!deleted) {
+			throw new DataisEmptyException("Comment not found with id: " + commnet_id);
+		}
+
+		return "Comment deleted successfully with id: " + commnet_id;
 	}
 }

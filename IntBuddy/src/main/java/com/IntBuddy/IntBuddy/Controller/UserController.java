@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.IntBuddy.IntBuddy.DTO.UserDTO;
 import com.IntBuddy.IntBuddy.Entity.UserEntity;
+import com.IntBuddy.IntBuddy.Exception.DataisEmptyException;
 import com.IntBuddy.IntBuddy.Service.EmailService;
 import com.IntBuddy.IntBuddy.Service.UserService;
 
@@ -21,94 +22,101 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-public class UserController implements Serializable{
-	
-	
+public class UserController implements Serializable {
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	
-	    @Autowired
-	    private UserService service;
 
-	    @Autowired
-	    private EmailService emailService;
+	@Autowired
+	private UserService service;
 
-	    // CREATE
-	    @PostMapping("/register")
-	    @CacheEvict(value = "user", allEntries = true)
-	
-	    public UserEntity createUser(@RequestBody UserEntity user) throws Exception {
+	@Autowired
+	private EmailService emailService;
 
-	        System.out.println("STEP 1: Saving user");
+	// Create User
+	@PostMapping("/register")
+	@CacheEvict(value = "user", allEntries = true)
 
-	        UserEntity newUser = service.createUser(user);
+	public UserEntity createUser(@RequestBody UserEntity user) throws Exception {
 
-	        System.out.println("STEP 2: Calling email");
+		System.out.println("STEP 1: Saving user");
 
-	        emailService.RegistrationEmail(newUser.getEmail(), newUser.getName(),newUser.getOtp());
+		UserEntity newUser = service.createUser(user);
 
-	        System.out.println("STEP 3: Email sent");
+		System.out.println("STEP 2: Calling email");
 
-	        return newUser;
-	    }
+		emailService.RegistrationEmail(newUser.getEmail(), newUser.getFullName(), newUser.getOtp());
+
+		System.out.println("STEP 3: Email sent");
+
+		return newUser;
+	}
 //	    public UserEntity createUser(@RequestBody UserEntity user) {
 //	        UserEntity newUser = service.createUser(user);
 //	        emailService.RegistrationEmail(newUser.getEmail(), newUser.getName());
 //	        return newUser;
 //	    }
 
-	    // GET ALL
-	    @GetMapping("/get")
-	    @Cacheable(value = "user", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
-	    public List<UserDTO> getAllUsers(
-	            @RequestParam(defaultValue = "0") int page,
-	            @RequestParam(defaultValue = "5") int size,
-	            @RequestParam(defaultValue = "id") String sortBy,
-	            @RequestParam(defaultValue = "asc") String direction) throws InterruptedException {
+	// Get All User
+	@GetMapping("/get")
+	@Cacheable(value = "user", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
+	public List<UserDTO> getAllUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id") String sortBy,
+			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException, DataisEmptyException {
+		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
-	        Thread.sleep(5000);
+		Pageable pageable = PageRequest.of(page, size, sort);
 
-	        Sort sort = direction.equalsIgnoreCase("desc")
-	                ? Sort.by(sortBy).descending()
-	                : Sort.by(sortBy).ascending();
+		Page<UserDTO> users = service.getAllUsers(pageable);
 
-	        Pageable pageable = PageRequest.of(page, size, sort);
+		if (users.isEmpty()) {
+			throw new DataisEmptyException("No user records found");
+		}
 
-	        Page<UserDTO> users = service.getAllUsers(pageable);
-
-	        return users.getContent();
-	    }
-
-	    // GET BY ID
-	    @GetMapping("/{id}")
-	    @Cacheable(value = "user", key = "#id")
-	    public UserDTO getUser(@PathVariable Long id) throws Exception {
-	        return service.getUserById(id);
-	    }
-
-	    // UPDATE
-	    @PutMapping("/updateUser/{id}")
-	    @CachePut(value = "user", key = "#id")
-	    public UserEntity updateUser(@PathVariable Long id, @RequestBody UserEntity user) {
-	        return service.updateUserEntity(id, user);
-	    }
-	    
-//	    @PostMapping("/enterphone/{phone}")
-//	    public String verfyotp(@RequestParam(value="phone") String phone)
-//	    {
-//	    	return service.verifyOtp(phone);
-//	    	
-//	    }
-//	    
-//	    
-//        @PostMapping("/verifyotp/{otp}")
-//        public boolean veri(@RequestParam(value="otp") String otp)
-//        {
-//        	
-//        	return service.verifyOtp2(otp);
-//        }
-//
+		return users.getContent();
 	}
+
+	// Get By ID
+	@GetMapping("/{id}")
+	@Cacheable(value = "user", key = "#id")
+	public UserDTO getUserid(@PathVariable Long id) throws Exception {
+		UserDTO user = service.getUserById(id);
+
+		if (user == null) {
+			throw new DataisEmptyException("User not found with id: " + id);
+		}
+
+		return user;
+
+	}
+
+	// Update ID
+	@PutMapping("/updateUser/{id}")
+	@CachePut(value = "user", key = "#id")
+	public UserEntity updateUser(@PathVariable Long id, @RequestBody UserEntity user) throws DataisEmptyException {
+		UserEntity updatedUser = service.updateUserEntity(id, user);
+
+		if (updatedUser == null) {
+			throw new DataisEmptyException("User not found with id: " + id);
+		}
+
+		return updatedUser;
+	}
+
+	// Verify OTP
+	@PostMapping("/enterphone/{phone}")
+	public String verfyotp(@RequestParam(value = "phone") String phone) {
+		return service.verifyOtp(phone);
+
+	}
+
+	// Verify OTP
+	@PostMapping("/verifyotp/{otp}")
+	public boolean veri(@RequestParam(value = "otp") String otp) {
+
+		return service.verifyOtp2(otp);
+	}
+
+}

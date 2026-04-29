@@ -1,6 +1,7 @@
 package com.IntBuddy.IntBuddy.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -25,24 +26,34 @@ public class CommentService {
 		this.userRepo = userRepo;
 	}
 
+	// Add Comments
 	public CommentEntity addcomment(CommentEntity comment) {
 
 		return repo.save(comment);
 	}
 
+	// Search Comments
 	public Page<CommentDTO> searchComments(String content, Pageable pageable) {
 
-		return repo.findByContentContainingIgnoreCase(content, pageable).map(comment -> {
+		Page<CommentEntity> page = repo.findByContentContainingIgnoreCase(content, pageable);
+
+		if (page.isEmpty()) {
+			return Page.empty();
+		}
+
+		return page.map(comment -> {
 			CommentDTO dto = new CommentDTO();
 			dto.setComment_id(comment.getComment_id());
 			dto.setContent(comment.getContent());
 			dto.setId(comment.getUser().getId());
-			dto.setName(comment.getUser().getName());
+			dto.setFullName(comment.getUser().getFullName());
 			dto.setEmail(comment.getUser().getEmail());
 			return dto;
+
 		});
 	}
 
+	// Get All Comments
 	public Page<CommentDTO> getAllComment(Pageable pageable) {
 
 		return repo.findAll(pageable).map(comment -> {
@@ -50,59 +61,80 @@ public class CommentService {
 			dto.setComment_id(comment.getComment_id());
 			dto.setContent(comment.getContent());
 			dto.setId(comment.getUser().getId());
-			dto.setName(comment.getUser().getName());
+			dto.setFullName(comment.getUser().getFullName());
 			dto.setEmail(comment.getUser().getEmail());
 			return dto;
 		});
 	}
 
-	public CommentDTO getCommentbyid(Long comment_id) throws Exception {
-		return repo.findById(comment_id).map((commentid) -> {
+	// Get Comment ID
+	public CommentDTO getCommentbyid(Long comment_id) {
 
-			CommentDTO come = new CommentDTO();
-			come.setId(commentid.getUser().getId());
-			come.setComment_id(commentid.getComment_id());
-			come.setContent(commentid.getContent());
-			come.setName(commentid.getUser().getName());
-			come.setEmail(commentid.getUser().getEmail());
-			return come;
-		}).orElseThrow(() -> new Exception("invalid id " + comment_id));
+		Optional<CommentEntity> optionalComment = repo.findById(comment_id);
 
-	}
-
-	public CommentDTO updateComment(Long comment_id, CommentDTO dto) throws Exception {
-
-		CommentEntity existing = repo.findById(comment_id)
-				.orElseThrow(() -> new Exception("Invalid comment id " + comment_id));
-
-		// update comment fields
-		existing.setContent(dto.getContent());
-
-		// update user if needed
-		if (dto.getId() != null) {
-			UserEntity user = userRepo.findById(dto.getId())
-					.orElseThrow(() -> new Exception("Invalid user id " + dto.getId()));
-			existing.setUser(user);
+		if (optionalComment.isEmpty()) {
+			return null;
 		}
 
-		// save updated entity
+		CommentEntity commentid = optionalComment.get();
+
+		CommentDTO come = new CommentDTO();
+		come.setId(commentid.getUser().getId());
+		come.setComment_id(commentid.getComment_id());
+		come.setContent(commentid.getContent());
+		come.setFullName(commentid.getUser().getFullName());
+		come.setEmail(commentid.getUser().getEmail());
+
+		return come;
+	}
+
+	// Update Comment
+	public CommentDTO updateComment(Long comment_id, CommentDTO dto) throws Exception {
+
+		Optional<CommentEntity> optionalComment = repo.findById(comment_id);
+
+		if (optionalComment.isEmpty()) {
+			return null;
+		}
+
+		CommentEntity existing = optionalComment.get();
+
+		existing.setContent(dto.getContent());
+
+		if (dto.getId() != null) {
+
+			Optional<UserEntity> optionalUser = userRepo.findById(dto.getId());
+
+			if (optionalUser.isEmpty()) {
+				return null;
+			}
+
+			existing.setUser(optionalUser.get());
+		}
+
 		CommentEntity saved = repo.save(existing);
 
-		// convert back to DTO
 		CommentDTO response = new CommentDTO();
 		response.setComment_id(saved.getComment_id());
 		response.setContent(saved.getContent());
 		response.setId(saved.getUser().getId());
-		response.setName(saved.getUser().getName());
+		response.setFullName(saved.getUser().getFullName());
 		response.setEmail(saved.getUser().getEmail());
 
 		return response;
 	}
 
-	public String deleteComment(Long comment_id) {
-		repo.deleteById(comment_id);
-		return "Comment Delete Succesfully.... " + comment_id;
+	// Delete Comment
+	public boolean deleteComment(Long id) {
 
+		Optional<CommentEntity> optionalComment = repo.findById(id);
+
+		if (optionalComment.isEmpty()) {
+			return false;
+		}
+
+		repo.delete(optionalComment.get());
+		return true;
 	}
 
 }

@@ -13,7 +13,8 @@ public class UserDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
-	private String name;
+
+	private String fullName;
 
 	private String email;
 
@@ -24,19 +25,17 @@ public class UserDTO implements Serializable {
 	private String country;
 
 	private String state;
-	
+
 	List<ExperianceDTO2> experiance;
 
 	List<CommentDTO2> comment;
-	
-	
 
-	public String getName() {
-		return name;
+	public String getFullName() {
+		return fullName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
 
 	public String getEmail() {
@@ -107,6 +106,4 @@ public class UserDTO implements Serializable {
 		this.state = state;
 	}
 
-	
-	
 }

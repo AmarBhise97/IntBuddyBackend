@@ -3,7 +3,6 @@ package com.IntBuddy.IntBuddy.Entity;
 import java.io.Serializable;
 import java.util.List;
 
-
 import com.IntBuddy.IntBuddy.Enum.Gender;
 
 import jakarta.persistence.Column;
@@ -15,44 +14,44 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "users")
 public class UserEntity implements Serializable {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	
 
 	@Column(nullable = false, length = 30)
-	private String name;
 
+	private String fullName;
+
+	@Email(message = "Invalid email format")
+	@NotBlank(message = "Email is required")
 	private String email;
 
 	private String phoneno;
 
 	private String password;
-	
+
 	private String otp;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Gender gender;
-	
-	
+
 	private String country;
-	
+
 	private String state;
-	
-	
-	
+
 	@OneToMany(mappedBy = "user")
 	private List<ExperianceEntity> experiance;
 
@@ -68,12 +67,12 @@ public class UserEntity implements Serializable {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getFullName() {
+		return fullName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
 
 	public String getEmail() {
@@ -101,7 +100,7 @@ public class UserEntity implements Serializable {
 	}
 
 	public void setExperiance(List<ExperianceEntity> experiance) {
-		
+
 		this.experiance = experiance;
 	}
 
@@ -157,6 +156,4 @@ public class UserEntity implements Serializable {
 		this.otp = otp;
 	}
 
-	
-	
 }

@@ -4,23 +4,21 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class ExperianceDTO2 implements Serializable {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-    private String companyName;
-    
-    private String position;
-    
-    private LocalDateTime date;
-    
-    private String details;
-    
-    private boolean result;
 
-	
+	private String companyName;
+
+	private String position;
+
+	private LocalDateTime date;
+
+	private String details;
+
+	private boolean result;
 
 	public String getCompanyName() {
 		return companyName;
@@ -61,7 +59,5 @@ public class ExperianceDTO2 implements Serializable {
 	public void setResult(boolean result) {
 		this.result = result;
 	}
-    
-    
 
 }

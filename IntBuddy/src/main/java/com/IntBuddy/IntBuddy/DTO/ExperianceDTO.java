@@ -5,31 +5,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ExperianceDTO implements Serializable {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	 private Long experiance_ID;
-	
-    private String companyName;
-    
-    private String position;
-    
-    private LocalDateTime date;
-    
-   
-    private String details;
-    
-    private boolean result;
-    
-    
-	private String name;
 
-	
+	private Long experiance_ID;
+
+	private String companyName;
+
+	private String position;
+
+	private LocalDateTime date;
+
+	private String details;
+
+	private boolean result;
+
+	private String fullName;
+
 	private List<Comment3DTO> coment;
-	
+
 	public String getCompanyName() {
 		return companyName;
 	}
@@ -78,12 +75,16 @@ public class ExperianceDTO implements Serializable {
 		this.experiance_ID = experiance_ID;
 	}
 
-	public String getName() {
-		return name;
+	public String getFullName() {
+		return fullName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
 	public List<Comment3DTO> getComent() {
@@ -93,8 +94,5 @@ public class ExperianceDTO implements Serializable {
 	public void setComent(List<Comment3DTO> coment) {
 		this.coment = coment;
 	}
-	
-    
-    
 
 }

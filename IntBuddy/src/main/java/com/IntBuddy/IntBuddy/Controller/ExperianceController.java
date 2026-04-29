@@ -29,6 +29,7 @@ import com.IntBuddy.IntBuddy.DTO.ExperianceDTO;
 import com.IntBuddy.IntBuddy.DTO.UserDTO;
 import com.IntBuddy.IntBuddy.Entity.ExperianceEntity;
 import com.IntBuddy.IntBuddy.Entity.UserEntity;
+import com.IntBuddy.IntBuddy.Exception.DataisEmptyException;
 import com.IntBuddy.IntBuddy.Service.EmailService;
 import com.IntBuddy.IntBuddy.Service.ExperianceService;
 import com.IntBuddy.IntBuddy.Service.UserService;
@@ -36,54 +37,52 @@ import com.IntBuddy.IntBuddy.Service.UserService;
 @RestController
 @RequestMapping("/Experiance")
 public class ExperianceController implements Serializable {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	@Autowired
-    private EmailService emailService;
+	private EmailService emailService;
 	@Autowired
 	private ExperianceService service;
 	@Autowired
 	private UserService serv;
 
-	// ADD experience
+	// ADD Experience
 	@PostMapping("/add")
 	@CacheEvict(value = "experiance", allEntries = true)
- 
-	public ExperianceEntity addExperiance(@RequestBody ExperianceEntity exp) throws Exception {
-		
-		    ExperianceEntity saved = service.addExperiance(exp);
 
-		    Long userId = saved.getUser().getId();
+	public ExperianceDTO addExperiance(@RequestBody ExperianceEntity exp) throws Exception {
 
-		    UserDTO user = serv.getUserById(userId); // fetch full user
+		ExperianceDTO dto = service.addExperianceDTO(exp);
 
-		    emailService.experiencemail(user.getEmail(), user.getName());
+		UserDTO user = serv.getUserById(exp.getUser().getId());
 
-		    return saved;
+		if (user != null) {
+			emailService.experiencemail(user.getEmail(), user.getFullName());
 		}
-	
-	public ExperianceEntity addExperiance1(@RequestBody ExperianceEntity exp) {
-		ExperianceEntity saved = service.addExperiance(exp);
-		 UserEntity user = saved.getUser();
 
-	        // Send email using user's email and name
-	        emailService.experiencemail(user.getEmail(), user.getName());
-
-		return saved;
+		return dto;
 	}
 
+//	public ExperianceEntity addExperiance1(@RequestBody ExperianceEntity exp) {
+//		ExperianceEntity saved = service.addExperiance(exp);
+//		UserEntity user = saved.getUser();
+//
+//		// Send email using user's email and name
+//		emailService.experiencemail(user.getEmail(), user.getFullName());
+//
+//		return saved;
+//	}
 
+	// Get ALL Experience
 	@GetMapping("/getexperiance")
 	@Cacheable(value = "experiance", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
 	public Map<String, Object> getAllExperiance(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "companyName") String sortBy,
-			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException {
+			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException, DataisEmptyException {
 
-		// validate sort field
-	
 		List<String> allowed = List.of("experiance_ID", "companyName", "position", "date");
 		if (!allowed.contains(sortBy)) {
 			sortBy = "experiance_ID";
@@ -95,7 +94,10 @@ public class ExperianceController implements Serializable {
 
 		Page<ExperianceDTO> pageData = service.getAllExperiance(pageable);
 
-		// prepare response
+		if (pageData.isEmpty()) {
+			throw new DataisEmptyException("No experience records found");
+		}
+
 		Map<String, Object> response = new HashMap<>();
 		response.put("data", pageData.getContent());
 		response.put("currentPage", pageData.getNumber());
@@ -112,11 +114,14 @@ public class ExperianceController implements Serializable {
 //		return ResponseEntity.ok(list);
 //	}
 
+	
+	
+    //Search Position
 	@GetMapping("/position/search")
-	@Cacheable(value = "experience", key = "#position + '-' + #page + '-' + #size + '-' + #sortBy + '-' + #direction")
+	@Cacheable(value = "experience", key = "#position + '-' + #page + '-' + #size + '-' + #sortBy + '-' + #direction", unless = "#result == null || #result.isEmpty()")
 	public List<ExperianceDTO> searchposition(@RequestParam String position, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "position") String sortBy,
-			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException {
+			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException, DataisEmptyException {
 
 		// validate sort field
 
@@ -129,33 +134,57 @@ public class ExperianceController implements Serializable {
 
 		Pageable pageable = PageRequest.of(page, size, sort);
 
-		List<ExperianceDTO> pageData = service.searchByPosition(position, pageable);
-
-		// if no data → return empty list instead of error
-		return pageData;
+		return service.searchByPosition(position, pageable);
 	}
 
+	
+	//Search Experience ID
 	@GetMapping("/getexperianceid/{id}")
 	@Cacheable(value = "experiance", key = "#experiance_ID")
 	public ExperianceDTO getExperianceId(@PathVariable("id") Long experiance_ID) throws Exception {
 
-		return service.getEnperianceid(experiance_ID);
-		
+		ExperianceDTO exp = service.getEnperianceid(experiance_ID);
+
+		if (exp == null) {
+			throw new DataisEmptyException("Experience not found with id: " + experiance_ID);
+		}
+
+		return exp;
 	}
 
+	
+	
+	//Update Experience
 	@PutMapping("/updateecperiance/{id}")
 	@CachePut(value = "experiance", key = "#experiance_ID")
 	public ExperianceDTO updateExperiance(@PathVariable("id") Long experiance_ID, @RequestBody ExperianceDTO experiance)
 			throws Exception {
 
-		return service.updateExperiance(experiance_ID, experiance);
+		ExperianceDTO updated = service.updateExperiance(experiance_ID, experiance);
+
+		if (updated == null) {
+			throw new DataisEmptyException("Experience not found with id: " + experiance_ID);
+		}
+
+		return updated;
 	}
 
+	
+	
+	
+	//Delete Experience
 	@DeleteMapping("/deleteExperiance/{id}")
 	@CacheEvict(value = "experiance", key = "#experiance_ID")
-	public String deleteExperiance(@PathVariable("id") Long experiance_ID) throws InterruptedException {
+	public String deleteExperiance(@PathVariable("id") Long experiance_ID)
+			throws InterruptedException, DataisEmptyException {
 
-		return "delete succesfully  " + service.deleteExperiance(experiance_ID);
+		boolean deleted = service.deleteExperiance(experiance_ID);
+
+		if (!deleted) {
+			throw new DataisEmptyException("Experiance not found with id: " + experiance_ID);
+		}
+
+		return "experiance deleted successfully with id: " + experiance_ID;
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.IntBuddy.IntBuddy.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -10,16 +11,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+
 
 import com.IntBuddy.IntBuddy.DTO.CommentDTO2;
 import com.IntBuddy.IntBuddy.DTO.ExperianceDTO2;
 import com.IntBuddy.IntBuddy.DTO.UserDTO;
 import com.IntBuddy.IntBuddy.Entity.UserEntity;
+import com.IntBuddy.IntBuddy.Exception.DataisEmptyException;
 import com.IntBuddy.IntBuddy.Repository.CommentRepository;
 import com.IntBuddy.IntBuddy.Repository.ExperianceRepository;
 import com.IntBuddy.IntBuddy.Repository.UserRepository;
-
 
 @Service
 public class UserService {
@@ -32,82 +33,87 @@ public class UserService {
 
 	@Autowired
 	private CommentRepository commentRepo;
+
+	Logger log = LoggerFactory.getLogger(UserService.class);
+
+	@Autowired
+	private OtpService service;
+
+	boolean flag = false;
+
+	String otp2;
 	
 	
-	
-	Logger log=LoggerFactory.getLogger(UserService.class);
-	
-	
-	
-	
-//	@Autowired
-//	private Otpservice service;
-//	
-	
-	boolean flag=false;
-	
-	 String otp2;
 
 	// Create user
 	public UserEntity createUser(UserEntity user) throws Exception {
-		
-		
-		if(!flag)
-		{
+
+		if (!flag) {
 			throw new Exception("Otp is not verified......");
 		}
-		log.info("sending the otp to "+user.getPhoneno());
-		
+		log.info("sending the otp to " + user.getPhoneno());
+
+		if (userRepository.existsByEmail(user.getEmail())) {
+			throw new DataisEmptyException("Email already registered: " + user.getEmail());
+		}
+
 		return userRepository.save(user);
-		
+
+	}
+	
+	
+	//Get User ID
+
+	public UserDTO getUserById(Long id) {
+
+	    Optional<UserEntity> optionalUser = userRepository.findById(id);
+
+	    if (optionalUser.isEmpty()) {
+	        return null;
+	    }
+
+	    UserEntity user = optionalUser.get();
+
+	    UserDTO us = new UserDTO();
+	    us.setId(user.getId());
+	    us.setFullName(user.getFullName());
+	    us.setEmail(user.getEmail());
+	    us.setPhoneno(user.getPhoneno());
+	    us.setGender(user.getGender());
+	    us.setCountry(user.getCountry());
+	    us.setState(user.getState());
+
+	    List<ExperianceDTO2> experiance = user.getExperiance().stream().map(exp -> {
+	        ExperianceDTO2 experiance2 = new ExperianceDTO2();
+	        experiance2.setCompanyName(exp.getCompanyName());
+	        experiance2.setDate(exp.getDate());
+	        experiance2.setDetails(exp.getDetails());
+	        experiance2.setPosition(exp.getPosition());
+	        experiance2.setResult(exp.isResult());
+	        return experiance2;
+	    }).collect(Collectors.toList());
+
+	    List<CommentDTO2> comment = user.getComment().stream().map(com -> {
+	        CommentDTO2 comment2 = new CommentDTO2();
+	        comment2.setContent(com.getContent());
+	        return comment2;
+	    }).collect(Collectors.toList());
+
+	    us.setComment(comment);
+	    us.setExperiance(experiance);
+
+	    return us;
 	}
 
-	// Get user by id
-	public UserDTO getUserById(Long id) throws Exception {
-		return userRepository.findById(id).map((user) -> {
-			UserDTO us = new UserDTO();
-			us.setId(user.getId());
-			us.setName(user.getName());
-			us.setEmail(user.getEmail());
-			us.setPhoneno(user.getPhoneno());
-			us.setGender(user.getGender());
-			us.setCountry(user.getCountry());
-			us.setState(user.getState());
-			
-
-			List<ExperianceDTO2> experiance = user.getExperiance().stream().map((exp) -> {
-				ExperianceDTO2 experiance2 = new ExperianceDTO2();
-				experiance2.setCompanyName(exp.getCompanyName());
-				experiance2.setDate(exp.getDate());
-				experiance2.setDetails(exp.getDetails());
-				experiance2.setPosition(exp.getPosition());
-				experiance2.setResult(exp.isResult());
-
-				return experiance2;
-			}).collect(Collectors.toList());
-
-			List<CommentDTO2> comment = user.getComment().stream().map((com) -> {
-
-				CommentDTO2 comment2 = new CommentDTO2();
-				comment2.setContent(com.getContent());
-
-				return comment2;
-
-			}).collect(Collectors.toList());
-
-			us.setComment(comment);
-			us.setExperiance(experiance);
-
-			return us;
-		}).orElseThrow(() -> new Exception("not the valid user" + id));
-	}
-
+	
+	//Get All Users
+	
 	public Page<UserDTO> getAllUsers(Pageable pageable) {
 		return userRepository.findAll(pageable).map(user -> {
 
 			UserDTO us = new UserDTO();
 			us.setId(user.getId());
-			us.setName(user.getName());
+			us.setFullName(user.getFullName());
 			us.setEmail(user.getEmail());
 			us.setPhoneno(user.getPhoneno());
 			us.setGender(user.getGender());
@@ -143,32 +149,50 @@ public class UserService {
 //        return userRepository.findByEmail(email).orElse(null);
 //    }
 //    
+	
+	
+	//Update Users
+	
 	public UserEntity updateUserEntity(Long id, UserEntity user) {
-		user.setId(id);
-		return userRepository.save(user);
 
+		Optional<UserEntity> optionalUser = userRepository.findById(id);
+
+		if (optionalUser.isEmpty()) {
+			return null; // ✅ let controller handle exception
+		}
+
+		UserEntity existingUser = optionalUser.get();
+
+		// ✅ update fields manually
+		existingUser.setFullName(user.getFullName());
+		existingUser.setEmail(user.getEmail());
+		existingUser.setPhoneno(user.getPhoneno());
+		existingUser.setGender(user.getGender());
+		existingUser.setCountry(user.getCountry());
+		existingUser.setState(user.getState());
+		existingUser.setPassword(user.getPassword());
+		existingUser.setOtp(user.getOtp());
+
+		return userRepository.save(existingUser);
 	}
 	
 	
+	//OTP Verify
 
-//	public String verifyOtp(@PathVariable(value="phone") String phone)
-//	{
-//		
-//		otp2= service.sendOtp(phone);
-//		
-//		return otp2;
-//	}
-//	
-//	
-//	
-//	
-//	
-//	public boolean verifyOtp2(@PathVariable(value="otp") String otp)
-//	{
-//		
-//		flag=otp2.equals(otp);
-//		
-//		return flag;
-//	}
+	public String verifyOtp(@PathVariable(value = "phone") String phone) {
+
+		otp2 = service.sendOtp(phone);
+
+		return otp2;
+	}
+
+	//OTP2 Verify
+	
+	public boolean verifyOtp2(@PathVariable(value = "otp") String otp) {
+
+		flag = otp2.equals(otp);
+
+		return flag;
+	}
 
 }

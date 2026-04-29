@@ -3,7 +3,7 @@ package com.IntBuddy.IntBuddy.DTO;
 import java.io.Serializable;
 
 public class CommentDTO2 implements Serializable {
-	
+
 	/**
 	 * 
 	 */
@@ -18,6 +18,5 @@ public class CommentDTO2 implements Serializable {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
-	
+
 }

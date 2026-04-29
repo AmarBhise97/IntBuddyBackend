@@ -13,14 +13,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.*;
 
 @Entity
-public class ExperianceEntity implements Serializable{
+public class ExperianceEntity implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long experiance_ID;
@@ -28,9 +27,6 @@ public class ExperianceEntity implements Serializable{
 	@ManyToOne
 	@JoinColumn(name = "id")
 	private UserEntity user;
-
-	@OneToMany()
-	private List<CommentEntity> comments;
 
 	private String companyName;
 
@@ -43,9 +39,8 @@ public class ExperianceEntity implements Serializable{
 	private boolean result;
 
 	private String role;
-	
+
 	private String experianceinyear;
-	
 
 	public String getExperianceinyear() {
 		return experianceinyear;
@@ -121,12 +116,6 @@ public class ExperianceEntity implements Serializable{
 
 	public void setRole(String role) {
 		this.role = role;
-	}
-	public List<CommentEntity> getComments() {
-		return comments;
-	}
-	public void setComments(List<CommentEntity> comments) {
-		this.comments = comments;
 	}
 
 }

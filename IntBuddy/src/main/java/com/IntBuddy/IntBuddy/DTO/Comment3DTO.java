@@ -2,15 +2,15 @@ package com.IntBuddy.IntBuddy.DTO;
 
 import java.io.Serializable;
 
-public class Comment3DTO implements Serializable{
-	
+public class Comment3DTO implements Serializable {
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-private Long comment_id;
-	
+	private Long comment_id;
+
 	private String content;
 
 	public Long getComment_id() {
@@ -28,5 +28,5 @@ private Long comment_id;
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
+
 }
