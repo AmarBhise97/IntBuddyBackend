@@ -6,22 +6,18 @@ services:
 
     container_name: intbuddy-backend
 
-
     restart: unless-stopped
 
 
     env_file:
-
       - /opt/intbuddy/env/backend.env
 
 
-    ports:
-
-      - "9090:9090"
+    expose:
+      - "9090"
 
 
     networks:
-
       - intbuddy-network
 
 
