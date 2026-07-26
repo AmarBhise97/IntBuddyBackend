@@ -5,11 +5,15 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
+
 env:
-  IMAGE_NAME: amarbhise/intbuddy-backend
+  IMAGE_NAME: amarbhise97/intbuddy-backend
 
 
 jobs:
+
   build-and-deploy:
 
     runs-on: ubuntu-latest
@@ -17,8 +21,10 @@ jobs:
 
     steps:
 
+
       - name: Checkout Source
         uses: actions/checkout@v4
+
 
 
       - name: Setup Java 21
@@ -29,23 +35,28 @@ jobs:
           cache: maven
 
 
+
       - name: Grant execute permission
         run: chmod +x mvnw
 
 
-      - name: Build Spring Boot
+
+      - name: Build Spring Boot Application
         run: ./mvnw clean package -DskipTests
 
 
-      - name: Set up Docker Buildx
+
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
 
-      - name: Login to Docker Hub
+
+      - name: Login Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
 
 
       - name: Build Docker Image
@@ -55,83 +66,195 @@ jobs:
             -t $IMAGE_NAME:${{ github.sha }} .
 
 
+
       - name: Push Latest Image
-        run: docker push $IMAGE_NAME:latest
+        run: |
+          docker push $IMAGE_NAME:latest
+
 
 
       - name: Push Commit Image
-        run: docker push $IMAGE_NAME:${{ github.sha }}
+        run: |
+          docker push $IMAGE_NAME:${{ github.sha }}
 
 
-      - name: Deploy to EC2
+
+      - name: Deploy Backend To EC2
         uses: appleboy/ssh-action@v1.2.0
 
         with:
+
           host: ${{ secrets.EC2_HOST }}
+
           username: ${{ secrets.EC2_USER }}
+
           key: ${{ secrets.EC2_SSH_KEY }}
+
 
 
           script: |
 
-            echo "Creating environment file"
+
+            echo "========== Backend Deployment Started =========="
+
+
+
+            echo "Creating environment directory"
+
 
             mkdir -p /opt/intbuddy/env
 
 
+
+
+
+            echo "Creating backend.env"
+
+
+
             cat > /opt/intbuddy/env/backend.env << EOF
-            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION=${{ secrets.AWS_REGION }}
-            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
-            EOF
 
 
-            echo "Moving to backend directory"
+                  SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+                  
+                  SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+                  
+                  SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+                  
+                  
+                  SPRING_REDIS_HOST=${{ secrets.SPRING_REDIS_HOST }}
+                  
+                  SPRING_REDIS_PORT=${{ secrets.SPRING_REDIS_PORT }}
+                  
+                  
+                  JWT_SECRET=${{ secrets.JWT_SECRET }}
+                  
+                  
+                  AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+                  
+                  AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  
+                  AWS_REGION=${{ secrets.AWS_REGION }}
+                  
+                  AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+                  
+                  
+                  GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+                  
+                  GROQ_URL=${{ secrets.GROQ_URL }}
+                  
+                  
+                  SPRING_MAIL_HOST=${{ secrets.SPRING_MAIL_HOST }}
+                  
+                  SPRING_MAIL_PORT=${{ secrets.SPRING_MAIL_PORT }}
+                  
+                  SPRING_MAIL_USERNAME=${{ secrets.SPRING_MAIL_USERNAME }}
+                  
+                  SPRING_MAIL_PASSWORD=${{ secrets.SPRING_MAIL_PASSWORD }}
+
+
+TWILIO_ACCOUNTSID=${{ secrets.TWILIO_ACCOUNTSID }}
+
+TWILIO_AUTHTOKEN=${{ secrets.TWILIO_AUTHTOKEN }}
+
+TWILIO_PHONENUMBER=${{ secrets.TWILIO_PHONENUMBER }}
+
+
+SERVER_PORT=9090
+
+
+EOF
+
+
+
+
+
+            echo "Updating backend repository"
+
+
 
             cd /opt/intbuddy/IntBuddyBackend
 
 
-            echo "Updating backend repository"
 
             git fetch origin main
 
             git reset --hard origin/main
 
 
-            echo "Logging into Docker Hub"
+
+
+
+            echo "Docker login"
+
+
 
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
               -u "${{ secrets.DOCKER_USERNAME }}" \
               --password-stdin
 
 
+
+
+
+            echo "Stopping old backend container"
+
+
+
+            docker compose down
+
+
+
+
+
             echo "Pulling latest backend image"
+
+
 
             docker compose pull
 
 
+
+
+
             echo "Starting backend container"
+
+
 
             docker compose up -d --remove-orphans
 
 
-            echo "Cleaning old images"
+
+
+
+            echo "Cleaning unused images"
+
+
 
             docker image prune -f
 
 
-            echo "Backend container status"
+
+
+
+            echo "Backend Status"
+
+
 
             docker compose ps
 
 
-            echo "Backend logs"
 
-            docker logs intbuddy-backend --tail=50
+
+
+            echo "Backend Logs"
+
+
+
+            docker logs intbuddy-backend --tail=100 || true
+
+
+
+
+
+            echo "========== Backend Deployment Completed =========="
