@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: amarbhise97/intbuddy-backend
+  IMAGE_NAME: amarbhise/intbuddy-backend
 
 jobs:
   build-and-deploy:
