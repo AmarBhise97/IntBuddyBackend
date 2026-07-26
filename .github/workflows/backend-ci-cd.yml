@@ -6,16 +6,20 @@ on:
       - main
 
 env:
-  IMAGE_NAME: amarbhise/intbuddy-backend
+  IMAGE_NAME: amarbhise97/intbuddy-backend
+
 
 jobs:
   build-and-deploy:
+
     runs-on: ubuntu-latest
+
 
     steps:
 
       - name: Checkout Source
         uses: actions/checkout@v4
+
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
@@ -23,15 +27,19 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-          
+
+
       - name: Grant execute permission
         run: chmod +x mvnw
+
 
       - name: Build Spring Boot
         run: ./mvnw clean package -DskipTests
 
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -39,28 +47,37 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+
       - name: Build Docker Image
         run: |
           docker build \
-          -t $IMAGE_NAME:latest \
-          -t $IMAGE_NAME:${{ github.sha }} .
+            -t $IMAGE_NAME:latest \
+            -t $IMAGE_NAME:${{ github.sha }} .
+
 
       - name: Push Latest Image
         run: docker push $IMAGE_NAME:latest
 
+
       - name: Push Commit Image
         run: docker push $IMAGE_NAME:${{ github.sha }}
 
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.0
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
 
+
           script: |
 
+            echo "Creating environment file"
+
             mkdir -p /opt/intbuddy/env
+
 
             cat > /opt/intbuddy/env/backend.env << EOF
             SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
@@ -75,18 +92,46 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             EOF
 
+
+            echo "Moving to backend directory"
+
             cd /opt/intbuddy/IntBuddyBackend
 
+
+            echo "Updating backend repository"
+
+            git fetch origin main
+
+            git reset --hard origin/main
+
+
+            echo "Logging into Docker Hub"
+
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
-                -u "${{ secrets.DOCKER_USERNAME }}" \
-                --password-stdin
+              -u "${{ secrets.DOCKER_USERNAME }}" \
+              --password-stdin
+
+
+            echo "Pulling latest backend image"
 
             docker compose pull
 
+
+            echo "Starting backend container"
+
             docker compose up -d --remove-orphans
+
+
+            echo "Cleaning old images"
 
             docker image prune -f
 
+
+            echo "Backend container status"
+
             docker compose ps
+
+
+            echo "Backend logs"
 
             docker logs intbuddy-backend --tail=50
