@@ -13,8 +13,13 @@ services:
       - /opt/intbuddy/env/backend.env
 
 
-    expose:
-      - "9090"
+    ports:
+      - "9090:9090"
+
+
+    depends_on:
+      - mysql
+      - redis
 
 
     networks:
