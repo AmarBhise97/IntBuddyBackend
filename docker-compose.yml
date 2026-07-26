@@ -1,19 +1,29 @@
 services:
+
   backend:
-    image: amarbhise/intbuddy-backend:latest
+
+    image: amarbhise97/intbuddy-backend:latest
+
     container_name: intbuddy-backend
 
     restart: unless-stopped
 
+
     env_file:
-      - ../env/backend.env
+      - /opt/intbuddy/env/backend.env
+
 
     expose:
-      - "8080"
+      - "9090"
+
 
     networks:
       - intbuddy-network
 
+
+
 networks:
+
   intbuddy-network:
+
     external: true
