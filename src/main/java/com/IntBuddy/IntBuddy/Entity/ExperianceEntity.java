@@ -24,9 +24,17 @@ public class ExperianceEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long experiance_ID;
 
-	@ManyToOne
-	@JoinColumn(name = "id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	  @JoinColumn(name = "experianceiid", referencedColumnName = "id")
 	private UserEntity user;
+	
+	@Lob
+	@Column(columnDefinition = "LONGBLOB")
+	private byte[] resume;
+
+	private String resumeName;
+
+	private String resumeType;
 
 	private String companyName;
 
@@ -117,5 +125,34 @@ public class ExperianceEntity implements Serializable {
 	public void setRole(String role) {
 		this.role = role;
 	}
+
+	public byte[] getResume() {
+		return resume;
+	}
+
+	public void setResume(byte[] resume) {
+		this.resume = resume;
+	}
+
+	public String getResumeName() {
+		return resumeName;
+	}
+
+	public void setResumeName(String resumeName) {
+		this.resumeName = resumeName;
+	}
+
+	public String getResumeType() {
+		return resumeType;
+	}
+
+	public void setResumeType(String resumeType) {
+		this.resumeType = resumeType;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+	
 
 }

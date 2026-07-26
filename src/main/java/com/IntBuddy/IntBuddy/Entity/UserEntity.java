@@ -1,14 +1,20 @@
 package com.IntBuddy.IntBuddy.Entity;
 
 import java.io.Serializable;
+
+
+import java.util.ArrayList;
 import java.util.List;
 
 import com.IntBuddy.IntBuddy.Enum.Gender;
+import com.IntBuddy.IntBuddy.Enum.Role;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +30,11 @@ public class UserEntity implements Serializable {
 	/**
 	 * 
 	 */
+	
+	
+	@Enumerated(EnumType.STRING)
+	private Role role = Role.USER;
+	
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -45,15 +56,19 @@ public class UserEntity implements Serializable {
 	private String otp;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	
 	private Gender gender;
 
 	private String country;
 
 	private String state;
 
-	@OneToMany(mappedBy = "user")
-	private List<ExperianceEntity> experiance;
+	@OneToMany(
+	        mappedBy = "user",
+	        cascade = CascadeType.ALL,
+	        fetch = FetchType.LAZY
+	)
+	private List<ExperianceEntity> experiance = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user")
 	private List<CommentEntity> comment;
@@ -99,11 +114,7 @@ public class UserEntity implements Serializable {
 		this.comment = comment;
 	}
 
-	public void setExperiance(List<ExperianceEntity> experiance) {
-
-		this.experiance = experiance;
-	}
-
+	
 	public String getPassword() {
 		return password;
 	}
@@ -155,5 +166,18 @@ public class UserEntity implements Serializable {
 	public void setOtp(String otp) {
 		this.otp = otp;
 	}
+
+	public void setExperiance(List<ExperianceEntity> experiance) {
+		this.experiance = experiance;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+	
 
 }

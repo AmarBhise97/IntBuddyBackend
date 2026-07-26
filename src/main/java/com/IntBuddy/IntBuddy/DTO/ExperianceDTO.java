@@ -16,12 +16,19 @@ public class ExperianceDTO implements Serializable {
 	private String companyName;
 
 	private String position;
+	
+	private String resumeName;
+	
+	private String resumeType;
 
 	private LocalDateTime date;
 
 	private String details;
 
 	private boolean result;
+	private String role;
+
+	private String experianceinyear;
 
 	private String fullName;
 
@@ -94,5 +101,41 @@ public class ExperianceDTO implements Serializable {
 	public void setComent(List<Comment3DTO> coment) {
 		this.coment = coment;
 	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public String getExperianceinyear() {
+		return experianceinyear;
+	}
+
+	public void setExperianceinyear(String experianceinyear) {
+		this.experianceinyear = experianceinyear;
+	}
+
+	public String getResumeName() {
+		return resumeName;
+	}
+
+	public void setResumeName(String resumeName) {
+		this.resumeName = resumeName;
+	}
+
+	public String getResumeType() {
+		return resumeType;
+	}
+
+	public void setResumeType(String resumeType) {
+		this.resumeType = resumeType;
+	}
+	
+	
+	
+	
 
 }

@@ -23,5 +23,18 @@ public interface ExperianceRepository extends JpaRepository<ExperianceEntity, Lo
 
 	@Query("SELECT e FROM ExperianceEntity e WHERE LOWER(e.position) LIKE LOWER(CONCAT('%', :position, '%'))")
 	Page<ExperianceEntity> searchByPosition(@Param("position") String position, Pageable pageable);
+	
+	
+	
+	@Query("""
+			SELECT e FROM ExperianceEntity e
+			WHERE LOWER(e.companyName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			   OR LOWER(e.position) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			   OR LOWER(e.role) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			   OR LOWER(e.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+			""")
+			Page<ExperianceEntity> searchAll(
+			        @Param("keyword") String keyword,
+			        Pageable pageable);
 
 }

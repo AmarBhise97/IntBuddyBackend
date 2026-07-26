@@ -59,6 +59,11 @@ public class ExperianceService {
 		dto.setDate(exp.getDate());
 		dto.setDetails(exp.getDetails());
 		dto.setResult(exp.isResult());
+		dto.setRole(exp.getRole());
+		dto.setExperianceinyear(exp.getExperianceinyear());
+		dto.setResumeName(exp.getResumeName());
+		dto.setResumeType(exp.getResumeType());
+		
 
 		if (exp.getUser() != null) {
 			dto.setFullName(exp.getUser().getFullName());
@@ -82,6 +87,10 @@ public class ExperianceService {
 			dto.setPosition(experiance.getPosition());
 			dto.setResult(experiance.isResult());
 			dto.setFullName(experiance.getUser().getFullName());
+			dto.setRole(experiance.getRole());
+			dto.setExperianceinyear(experiance.getExperianceinyear());
+			dto.setResumeName(experiance.getResumeName());
+			dto.setResumeType(experiance.getResumeType());
 
 			if (experiance.getUser() != null) {
 				dto.setFullName(experiance.getUser().getFullName());
@@ -137,6 +146,7 @@ public class ExperianceService {
 			dto.setDetails(exp.getDetails());
 			dto.setPosition(exp.getPosition());
 			dto.setResult(exp.isResult());
+			
 
 			dto.setFullName(exp.getUser().getFullName());
 			if (exp.getUser() != null) {
@@ -147,6 +157,41 @@ public class ExperianceService {
 		}).collect(Collectors.toList());
 	}
 
+	
+	
+	public List<ExperianceDTO> searchAll(String keyword, Pageable pageable)
+	        throws DataisEmptyException {
+
+	    Page<ExperianceEntity> page =
+	            experianceRepo.searchAll(keyword, pageable);
+
+	    if (page.isEmpty()) {
+	        throw new DataisEmptyException("No data found");
+	    }
+
+	    return page.stream().map(exp -> {
+
+	        ExperianceDTO dto = new ExperianceDTO();
+
+	        dto.setExperiance_ID(exp.getExperiance_ID());
+	        dto.setCompanyName(exp.getCompanyName());
+	        dto.setPosition(exp.getPosition());
+	        dto.setRole(exp.getRole());
+	        dto.setExperianceinyear(exp.getExperianceinyear());
+	        dto.setDetails(exp.getDetails());
+	        dto.setResult(exp.isResult());
+	        dto.setResumeName(exp.getResumeName());
+	        dto.setResumeType(exp.getResumeType());
+
+	        if(exp.getUser()!=null){
+	            dto.setFullName(exp.getUser().getFullName());
+	        }
+
+	        return dto;
+
+	    }).collect(Collectors.toList());
+
+	}
 	// Get Experience ID
 
 	public ExperianceDTO getEnperianceid(Long id) {
@@ -167,6 +212,10 @@ public class ExperianceService {
 		experiance2.setPosition(idd.getPosition());
 		experiance2.setResult(idd.isResult());
 		experiance2.setFullName(idd.getUser().getFullName());
+		experiance2.setRole(idd.getRole());
+		experiance2.setExperianceinyear(idd.getExperianceinyear());
+		experiance2.setResumeName(idd.getResumeName());
+		experiance2.setResumeType(idd.getResumeType());
 
 		return experiance2;
 	}

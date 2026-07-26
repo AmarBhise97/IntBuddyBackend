@@ -18,7 +18,7 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
 
             message.setFrom("bhiseamarwagholi@gmail.com");
-            message.setFrom("malusarenamrata88@gmail.com");
+          //  message.setFrom("malusarenamrata88@gmail.com");
 
             message.setTo(toEmail);
             message.setSubject("Experience Added Successfully..!");
@@ -92,7 +92,7 @@ public class EmailService {
                     "<p>Regards,<br><b>Team IntBuddy</b></p>" +
 
                     "<hr>" +
-                    "<p style='font-size:12px; text-align:center; color:gray;'>© malusarenamrata88@gmail.com</p>" +
+                    "<p style='font-size:12px; text-align:center; color:gray;'>© bhiseamarwagholi@gmail.com.com</p>" +
 
                     "</div>" +
                     "</body>" +
@@ -122,6 +122,40 @@ public class EmailService {
             e.printStackTrace();
         }
     }    
+    public void contactMail(String name, String email, String messageText) {
+
+        try {
+
+            SimpleMailMessage message = new SimpleMailMessage();
+
+            message.setFrom("bhiseamarwagholi@gmail.com");
+
+            // Admin Email
+            message.setTo("bhiseamarwagholi@gmail.com");
+
+            message.setSubject("New Contact Message");
+
+            message.setText(
+
+                    "Name : " + name +
+
+                    "\n\nEmail : " + email +
+
+                    "\n\nMessage :\n" +
+
+                    messageText
+
+            );
+
+            mailSender.send(message);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(e.getMessage());
+
+        }
+
+    }
     
     //After Registration
 //    public void RegistrationEmail1(String toEmail, String name) {

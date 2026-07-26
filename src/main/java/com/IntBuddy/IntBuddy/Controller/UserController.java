@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.List;
 @CrossOrigin(origins = {
 	    "http://localhost:5173",
-	    "https://your-frontend-domain.vercel.app"
+	   
 	})
 @RestController
 @RequestMapping("/users")
@@ -97,17 +97,20 @@ public class UserController implements Serializable {
 	}
 
 	// Get By ID
+
+	
 	@GetMapping("/{id}")
-	@Cacheable(value = "user", key = "#id")
 	public UserDTO getUserid(@PathVariable Long id) throws Exception {
-		UserDTO user = service.getUserById(id);
 
-		if (user == null) {
-			throw new DataisEmptyException("User not found with id: " + id);
-		}
+	    UserDTO user = service.getUserById(id);
 
-		return user;
+	    if (user == null) {
+	        throw new RuntimeException("User not found with id : " + id);
+	    }
 
+	    System.out.println("Controller Response = " + user.getExperiance().size());
+
+	    return user;
 	}
 
 	// Update ID
@@ -123,11 +126,16 @@ public class UserController implements Serializable {
 		return updatedUser;
 	}
 
-	// Verify OTP
-	@PostMapping("/enterphone/{phone}")
-	public String verfyotp(@PathVariable String phone) {
-		return service.verifyOtp(phone);
-
+//	// Verify OTP
+//	@PostMapping("/enterphone/{phone}")
+//	public String verfyotp(@PathVariable String phone) {
+//		return service.verifyOtp(phone);
+//
+//	}
+	
+	@PostMapping("/sendotp/{email}")
+	public String sendOtp(@PathVariable String email) {
+	    return service.verifyOtp(email);
 	}
 
 	// Verify OTP
@@ -135,6 +143,25 @@ public class UserController implements Serializable {
 	public boolean veri(@PathVariable String otp) {
 
 		return service.verifyOtp2(otp);
+	}
+	
+	@PostMapping("/login")
+	public UserEntity login(@RequestBody UserEntity user) throws Exception {
+
+	    return service.loginUser(
+	            user.getEmail(),
+	            user.getPassword()
+	    );
+
+	}
+	@GetMapping("/check-email")
+	public boolean checkEmail(@RequestParam String email) {
+	    return service.checkEmail(email);
+	}
+
+	@GetMapping("/check-phone")
+	public boolean checkPhone(@RequestParam String phoneno) {
+	    return service.checkPhone(phoneno);
 	}
 
 }

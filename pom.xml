@@ -48,6 +48,12 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
+        
+        <dependency>
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>pdfbox</artifactId>
+    <version>2.0.30</version>
+</dependency>
 
         <!-- DevTools -->
         <dependency>
@@ -55,22 +61,32 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!--Groq API for chat boot-->
+        <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
 
-        <!-- Lombok -->
-       
-        <!-- Email -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-json</artifactId>
+</dependency>
+
+		<!-- Lombok -->
+
+		<!-- Email -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-        
-        <!--cache-->
+
+		<!--cache-->
         <dependency>
     <groupId>org.springframework.boot</groupId>
        <artifactId>spring-boot-starter-cache</artifactId>
        <scope>compile</scope>
     </dependency>
-     <!--redis-->
+		<!--redis-->
     <dependency>
        <groupId>org.springframework.boot</groupId>
        <artifactId>spring-boot-starter-data-redis</artifactId>
@@ -89,11 +105,10 @@
     <version>9.14.0</version>
 </dependency>
 
-		<!-- Security-->
-		<!-- <dependency>
+	<dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-security</artifactId>
-</dependency>-->
+</dependency>
 
 		<!-- Testing -->
         <dependency>

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -17,6 +18,7 @@ import com.IntBuddy.IntBuddy.DTO.CommentDTO2;
 import com.IntBuddy.IntBuddy.DTO.ExperianceDTO2;
 import com.IntBuddy.IntBuddy.DTO.UserDTO;
 import com.IntBuddy.IntBuddy.Entity.UserEntity;
+import com.IntBuddy.IntBuddy.Enum.Role;
 import com.IntBuddy.IntBuddy.Exception.DataisEmptyException;
 import com.IntBuddy.IntBuddy.Repository.CommentRepository;
 import com.IntBuddy.IntBuddy.Repository.ExperianceRepository;
@@ -24,6 +26,9 @@ import com.IntBuddy.IntBuddy.Repository.UserRepository;
 
 @Service
 public class UserService {
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
 
 	@Autowired
 	private ExperianceRepository experiancerepo;
@@ -54,12 +59,18 @@ public class UserService {
 		log.info("sending the otp to " + user.getPhoneno());
 
 		if (userRepository.existsByEmail(user.getEmail())) {
-			throw new DataisEmptyException("Email already registered: " + user.getEmail());
+		    throw new DataisEmptyException("Email already registered: " + user.getEmail());
 		}
 
+		// Encrypt Password Before Saving
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+		user.setRole(Role.USER);
 		return userRepository.save(user);
 
 	}
+	
+	
 	
 	
 	//Get User ID
@@ -73,6 +84,10 @@ public class UserService {
 	    }
 
 	    UserEntity user = optionalUser.get();
+
+
+	    System.out.println("User Id : " + user.getId());
+	    System.out.println("Experience Count : " + user.getExperiance().size());
 
 	    UserDTO us = new UserDTO();
 	    us.setId(user.getId());
@@ -90,6 +105,11 @@ public class UserService {
 	        experiance2.setDetails(exp.getDetails());
 	        experiance2.setPosition(exp.getPosition());
 	        experiance2.setResult(exp.isResult());
+	        experiance2.setExperianceinyear(exp.getExperianceinyear());
+	        experiance2.setRole(exp.getRole());
+	        experiance2.setExperiance_ID(exp.getExperiance_ID());
+	        experiance2.setResumeName(exp.getResumeName());
+	        experiance2.setResumeType(exp.getResumeType());
 	        return experiance2;
 	    }).collect(Collectors.toList());
 
@@ -98,6 +118,11 @@ public class UserService {
 	        comment2.setContent(com.getContent());
 	        return comment2;
 	    }).collect(Collectors.toList());
+	    System.out.println("DTO Experience Size: " + experiance.size());
+
+	    for (ExperianceDTO2 dto : experiance) {
+	        System.out.println("DTO Company: " + dto.getCompanyName());
+	    }
 
 	    us.setComment(comment);
 	    us.setExperiance(experiance);
@@ -128,7 +153,13 @@ public class UserService {
 				e.setDetails(exp.getDetails());
 				e.setResult(exp.isResult());
 				e.setDate(exp.getDate());
+				e.setRole(exp.getRole());
+				e.setExperianceinyear(exp.getExperianceinyear());
+				e.setExperiance_ID(exp.getExperiance_ID());
+		        e.setResumeName(exp.getResumeName());
+		        e.setResumeType(exp.getResumeType());
 				return e;
+				
 			}).collect(Collectors.toList());
 
 			List<CommentDTO2> comment = user.getComment().stream().map(com -> {
@@ -170,7 +201,14 @@ public class UserService {
 		existingUser.setGender(user.getGender());
 		existingUser.setCountry(user.getCountry());
 		existingUser.setState(user.getState());
-		existingUser.setPassword(user.getPassword());
+		if(user.getPassword()!=null &&
+				!user.getPassword().isBlank()){
+
+				existingUser.setPassword(
+				passwordEncoder.encode(user.getPassword())
+				);
+
+				}
 		existingUser.setOtp(user.getOtp());
 
 		return userRepository.save(existingUser);
@@ -179,20 +217,56 @@ public class UserService {
 	
 	//OTP Verify
 
-	public String verifyOtp(@PathVariable(value = "phone") String phone) {
-
-		otp2 = service.sendOtp(phone);
-
-		return otp2;
-	}
-
-	//OTP2 Verify
-	
+//	public String verifyOtp(@PathVariable(value = "phone") String phone) {
+//
+//		otp2 = service.sendOtp(phone);
+//
+//		return otp2;
+//	}
+//
+//  OTP2 Verify
+//	
 	public boolean verifyOtp2(@PathVariable(value = "otp") String otp) {
 
 		flag = otp2.equals(otp);
 
 		return flag;
+	}
+	
+	@Autowired
+	private EmailService emailService;
+
+	public String verifyOtp(String email) {
+
+	    otp2 = String.valueOf((int)((Math.random() * 900000) + 100000));
+
+	    emailService.Otpemail(email, otp2);
+
+	    return "OTP Sent Successfully";
+	}
+	
+	public UserEntity loginUser(String email, String password) throws Exception {
+
+	    Optional<UserEntity> user = userRepository.findByEmail(email);
+
+	    if (user.isEmpty()) {
+	        throw new Exception("Invalid Email");
+	    }
+
+	    if (!passwordEncoder.matches(password, user.get().getPassword())) {
+	        throw new Exception("Invalid Password");
+	    }
+
+	    return user.get();
+	}
+	// Check Email
+	public boolean checkEmail(String email) {
+	    return userRepository.existsByEmail(email);
+	}
+
+	// Check Phone Number
+	public boolean checkPhone(String phoneno) {
+	    return userRepository.existsByPhoneno(phoneno);
 	}
 
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,13 +25,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.IntBuddy.IntBuddy.DTO.ExperianceDTO;
 import com.IntBuddy.IntBuddy.DTO.UserDTO;
 import com.IntBuddy.IntBuddy.Entity.ExperianceEntity;
 import com.IntBuddy.IntBuddy.Entity.UserEntity;
 import com.IntBuddy.IntBuddy.Exception.DataisEmptyException;
+import com.IntBuddy.IntBuddy.Repository.ExperianceRepository;
 import com.IntBuddy.IntBuddy.Service.EmailService;
 import com.IntBuddy.IntBuddy.Service.ExperianceService;
 import com.IntBuddy.IntBuddy.Service.UserService;
@@ -51,20 +55,43 @@ public class ExperianceController implements Serializable {
 	private UserService serv;
 
 	// ADD Experience
-	@PostMapping("/add")
+	@PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@CacheEvict(value = "experiance", allEntries = true)
+	public ExperianceDTO addExperiance(
 
-	public ExperianceDTO addExperiance(@RequestBody ExperianceEntity exp) throws Exception {
+	        @RequestPart("experience") ExperianceEntity exp,
 
-		ExperianceDTO dto = service.addExperianceDTO(exp);
+	        @RequestPart(value = "resume", required = false) MultipartFile resume
 
-		UserDTO user = serv.getUserById(exp.getUser().getId());
+	) throws Exception {
 
-		if (user != null) {
-			emailService.experiencemail(user.getEmail(), user.getFullName());
-		}
+	    // Resume Validation
+	    if (resume != null && !resume.isEmpty()) {
 
-		return dto;
+	        // Only PDF
+	        if (!resume.getContentType().equalsIgnoreCase("application/pdf")) {
+	            throw new RuntimeException("Only PDF files are allowed.");
+	        }
+
+	        // Max 1 MB
+	        if (resume.getSize() > (1024 * 1024)) {
+	            throw new RuntimeException("Resume size must be less than 1 MB.");
+	        }
+
+	        exp.setResume(resume.getBytes());
+	        exp.setResumeName(resume.getOriginalFilename());
+	        exp.setResumeType(resume.getContentType());
+	    }
+
+	    ExperianceDTO dto = service.addExperianceDTO(exp);
+
+	    UserDTO user = serv.getUserById(exp.getUser().getId());
+
+	    if (user != null) {
+	        emailService.experiencemail(user.getEmail(), user.getFullName());
+	    }
+
+	    return dto;
 	}
 
 //	public ExperianceEntity addExperiance1(@RequestBody ExperianceEntity exp) {
@@ -136,6 +163,23 @@ public class ExperianceController implements Serializable {
 		return service.searchByPosition(position, pageable);
 	}
 
+	
+	@GetMapping("/search")
+	public List<ExperianceDTO> searchAll(
+
+	        @RequestParam String keyword,
+
+	        @RequestParam(defaultValue = "0") int page,
+
+	        @RequestParam(defaultValue = "10") int size
+
+	) throws DataisEmptyException {
+
+	    Pageable pageable = PageRequest.of(page, size);
+
+	    return service.searchAll(keyword, pageable);
+
+	}
 	// Search Experience ID
 	@GetMapping("/getexperianceid/{id}")
 	@Cacheable(value = "experiance", key = "#experiance_ID")
@@ -178,6 +222,27 @@ public class ExperianceController implements Serializable {
 		}
 
 		return "experiance deleted successfully with id: " + experiance_ID;
+	}
+	@Autowired
+	private ExperianceRepository experianceRepository;
+
+	@GetMapping("/resume/{id}")
+	public ResponseEntity<byte[]> downloadResume(@PathVariable Long id) {
+
+	    ExperianceEntity exp = experianceRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("Experience not found"));
+
+	    if (exp.getResume() == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.parseMediaType(exp.getResumeType()))
+	            .header(
+	                "Content-Disposition",
+	                "attachment; filename=\"" + exp.getResumeName() + "\""
+	            )
+	            .body(exp.getResume());
 	}
 
 }
