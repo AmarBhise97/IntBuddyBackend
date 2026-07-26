@@ -1,6 +1,6 @@
 services:
   backend:
-    image: amarbhise97/intbuddy-backend:latest
+    image: amarbhise/intbuddy-backend:latest
     container_name: intbuddy-backend
 
     restart: unless-stopped
