@@ -33,7 +33,8 @@ public class SecurityConfig {
             	        "/contact/**",
             	        "/anonymous/**",
             	        "/ai/**",
-            	        "/resume/**"
+            	        "/resume/**",
+            	        "/error"
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)
