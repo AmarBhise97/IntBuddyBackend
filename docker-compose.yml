@@ -12,6 +12,10 @@ services:
     env_file:
       - /opt/intbuddy/env/backend.env
 
+    # Cap the JVM so it doesn't starve MySQL on a small instance
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx384m -XX:MaxMetaspaceSize=192m -Xss512k"
+
 
     expose:
       - "8080"
