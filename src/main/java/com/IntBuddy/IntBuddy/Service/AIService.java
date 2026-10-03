@@ -19,6 +19,9 @@ public class AIService {
 	@Value("${groq.url}")
 	private String url;
 
+	@Value("${groq.model}")
+	private String model;
+
 	public AIService(RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 	}
@@ -30,7 +33,7 @@ public class AIService {
 		headers.setBearerAuth(apiKey);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		Map<String, Object> body = Map.of("model", "llama-3.1-8b-instant", "messages",
+		Map<String, Object> body = Map.of("model", model, "messages",
 				List.of(Map.of("role", "user", "content", message)));
 
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
