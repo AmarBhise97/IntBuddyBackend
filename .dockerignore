@@ -1,0 +1,10 @@
+.git
+.github
+target
+bin
+*.log
+.idea
+.vscode
+.settings
+.classpath
+.project
