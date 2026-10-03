@@ -96,9 +96,9 @@ jobs:
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> /opt/intbuddy/env/backend.env
 
 
-            echo "SPRING_REDIS_HOST=${{ secrets.SPRING_REDIS_HOST }}" >> /opt/intbuddy/env/backend.env
+            echo "SPRING_REDIS_HOST=${{ secrets.SPRING_REDIS_HOST || 'intbuddy-redis' }}" >> /opt/intbuddy/env/backend.env
 
-            echo "SPRING_REDIS_PORT=${{ secrets.SPRING_REDIS_PORT }}" >> /opt/intbuddy/env/backend.env
+            echo "SPRING_REDIS_PORT=${{ secrets.SPRING_REDIS_PORT || '6379' }}" >> /opt/intbuddy/env/backend.env
 
 
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> /opt/intbuddy/env/backend.env
