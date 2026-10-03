@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,9 +27,10 @@ public class ExperianceEntity implements Serializable {
 	private Long experiance_ID;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	  @JoinColumn(name = "experianceiid", referencedColumnName = "id")
+	@JoinColumn(name = "experianceiid", referencedColumnName = "id")
+	@JsonIgnore
 	private UserEntity user;
-	
+
 	@Lob
 	@Column(columnDefinition = "LONGBLOB")
 	private byte[] resume;
@@ -153,6 +156,5 @@ public class ExperianceEntity implements Serializable {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
-	
 
 }

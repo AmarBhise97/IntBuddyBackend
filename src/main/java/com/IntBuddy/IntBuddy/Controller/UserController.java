@@ -146,7 +146,7 @@ public class UserController implements Serializable {
 	}
 	
 	@PostMapping("/login")
-	public UserEntity login(@RequestBody UserEntity user) throws Exception {
+	public UserDTO login(@RequestBody UserEntity user) throws Exception {
 
 	    return service.loginUser(
 	            user.getEmail(),

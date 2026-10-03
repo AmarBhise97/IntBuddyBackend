@@ -245,19 +245,37 @@ public class UserService {
 	    return "OTP Sent Successfully";
 	}
 	
-	public UserEntity loginUser(String email, String password) throws Exception {
+	public UserDTO loginUser(String email, String password) throws Exception {
 
-	    Optional<UserEntity> user = userRepository.findByEmail(email);
+	    Optional<UserEntity> optionalUser =
+	            userRepository.findByEmail(email);
 
-	    if (user.isEmpty()) {
+	    if (optionalUser.isEmpty()) {
 	        throw new Exception("Invalid Email");
 	    }
 
-	    if (!passwordEncoder.matches(password, user.get().getPassword())) {
+	    UserEntity user = optionalUser.get();
+
+	    if (!passwordEncoder.matches(
+	            password,
+	            user.getPassword()
+	    )) {
 	        throw new Exception("Invalid Password");
 	    }
 
-	    return user.get();
+
+	    // Create safe Login DTO
+	    UserDTO dto = new UserDTO();
+
+	    dto.setId(user.getId());
+	    dto.setFullName(user.getFullName());
+	    dto.setEmail(user.getEmail());
+	    dto.setPhoneno(user.getPhoneno());
+	    dto.setGender(user.getGender());
+	    dto.setCountry(user.getCountry());
+	    dto.setState(user.getState());
+
+	    return dto;
 	}
 	// Check Email
 	public boolean checkEmail(String email) {

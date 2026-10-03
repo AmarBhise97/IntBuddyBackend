@@ -55,45 +55,77 @@ public class ExperianceController implements Serializable {
 	private UserService serv;
 
 	// ADD Experience
-	@PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	// ==========================================
+	// ADD EXPERIENCE
+	// ==========================================
+	@PostMapping(
+	        value = "/add",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+	)
 	@CacheEvict(value = "experiance", allEntries = true)
 	public ExperianceDTO addExperiance(
 
-	        @RequestPart("experience") ExperianceEntity exp,
+	        @RequestPart("experience")
+	        ExperianceEntity exp,
 
-	        @RequestPart(value = "resume", required = false) MultipartFile resume
+	        @RequestParam("userId")
+	        Long userId,
+
+	        @RequestPart(
+	                value = "resume",
+	                required = false
+	        )
+	        MultipartFile resume
 
 	) throws Exception {
 
-	    // Resume Validation
+	    System.out.println("=================================");
+	    System.out.println("Received User ID = " + userId);
+	    System.out.println("Company = " + exp.getCompanyName());
+	    System.out.println("Position = " + exp.getPosition());
+	    System.out.println("=================================");
+
+	    // Resume validation
 	    if (resume != null && !resume.isEmpty()) {
 
-	        // Only PDF
-	        if (!resume.getContentType().equalsIgnoreCase("application/pdf")) {
-	            throw new RuntimeException("Only PDF files are allowed.");
+	        if (!"application/pdf".equalsIgnoreCase(
+	                resume.getContentType())) {
+
+	            throw new RuntimeException(
+	                    "Only PDF files are allowed."
+	            );
 	        }
 
-	        // Max 1 MB
-	        if (resume.getSize() > (1024 * 1024)) {
-	            throw new RuntimeException("Resume size must be less than 1 MB.");
+	        if (resume.getSize() > 1024 * 1024) {
+
+	            throw new RuntimeException(
+	                    "Resume size must be less than 1 MB."
+	            );
 	        }
 
 	        exp.setResume(resume.getBytes());
 	        exp.setResumeName(resume.getOriginalFilename());
 	        exp.setResumeType(resume.getContentType());
 	    }
+	    																										
+	    // Save
+	    ExperianceDTO dto =
+	            service.addExperianceDTO(exp, userId);
 
-	    ExperianceDTO dto = service.addExperianceDTO(exp);
-
-	    UserDTO user = serv.getUserById(exp.getUser().getId());
+	    // Email
+	    UserDTO user =
+	            serv.getUserById(userId);
 
 	    if (user != null) {
-	        emailService.experiencemail(user.getEmail(), user.getFullName());
+
+	        emailService.experiencemail(
+	                user.getEmail(),
+	                user.getFullName()
+	        );
 	    }
 
 	    return dto;
 	}
-
 //	public ExperianceEntity addExperiance1(@RequestBody ExperianceEntity exp) {
 //		ExperianceEntity saved = service.addExperiance(exp);
 //		UserEntity user = saved.getUser();
@@ -106,33 +138,102 @@ public class ExperianceController implements Serializable {
 
 	// Get ALL Experience
 	@GetMapping("/getexperiance")
-	@Cacheable(value = "experiance", key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction")
-	public Map<String, Object> getAllExperiance(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "companyName") String sortBy,
-			@RequestParam(defaultValue = "asc") String direction) throws InterruptedException, DataisEmptyException {
+	@Cacheable(
+	    value = "experiance",
+	    key = "#page + '-' + #size + '-' + #sortBy + '-' + #direction"
+	)
+	public Map<String, Object> getAllExperiance(
 
-		List<String> allowed = List.of("experiance_ID", "companyName", "position", "date");
-		if (!allowed.contains(sortBy)) {
-			sortBy = "experiance_ID";
-		}
+	        @RequestParam(defaultValue = "0") int page,
 
-		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+	        @RequestParam(defaultValue = "10") int size,
 
-		Pageable pageable = PageRequest.of(page, size, sort);
+	        @RequestParam(defaultValue = "experiance_ID") String sortBy,
 
-		Page<ExperianceDTO> pageData = service.getAllExperiance(pageable);
+	        @RequestParam(defaultValue = "desc") String direction
 
-		if (pageData.isEmpty()) {
-			throw new DataisEmptyException("No experience records found");
-		}
+	) throws InterruptedException, DataisEmptyException {
 
-		Map<String, Object> response = new HashMap<>();
-		response.put("data", pageData.getContent());
-		response.put("currentPage", pageData.getNumber());
-		response.put("totalPages", pageData.getTotalPages());
-		response.put("totalItems", pageData.getTotalElements());
 
-		return response;
+	    // Allowed sorting fields
+	    List<String> allowedFields = List.of(
+	            "experiance_ID",
+	            "companyName",
+	            "position",
+	            "date",
+	            "role",
+	            "experianceinyear"
+	    );
+
+
+	    // If old frontend sends "experiance"
+	    if ("experiance".equalsIgnoreCase(sortBy)) {
+	        sortBy = "experiance_ID";
+	    }
+
+
+	    // Prevent invalid sort field
+	    if (!allowedFields.contains(sortBy)) {
+	        sortBy = "experiance_ID";
+	    }
+
+
+	    Sort sort;
+
+	    if ("desc".equalsIgnoreCase(direction)) {
+
+	        sort = Sort.by(sortBy).descending();
+
+	    } else {
+
+	        sort = Sort.by(sortBy).ascending();
+
+	    }
+
+
+	    Pageable pageable =
+	            PageRequest.of(page, size, sort);
+
+
+	    Page<ExperianceDTO> pageData =
+	            service.getAllExperiance(pageable);
+
+
+	    if (pageData.isEmpty()) {
+
+	        throw new DataisEmptyException(
+	                "No experience records found"
+	        );
+
+	    }
+
+
+	    Map<String, Object> response =
+	            new HashMap<>();
+
+
+	    response.put(
+	            "data",
+	            pageData.getContent()
+	    );
+
+	    response.put(
+	            "currentPage",
+	            pageData.getNumber()
+	    );
+
+	    response.put(
+	            "totalPages",
+	            pageData.getTotalPages()
+	    );
+
+	    response.put(
+	            "totalItems",
+	            pageData.getTotalElements()
+	    );
+
+
+	    return response;
 	}
 //	// SEARCH by company
 //	@GetMapping("/search/company")

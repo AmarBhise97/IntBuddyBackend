@@ -2,7 +2,6 @@ package com.IntBuddy.IntBuddy.Entity;
 
 import java.io.Serializable;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +29,10 @@ public class UserEntity implements Serializable {
 	/**
 	 * 
 	 */
-	
-	
+
 	@Enumerated(EnumType.STRING)
 	private Role role = Role.USER;
-	
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -42,7 +40,6 @@ public class UserEntity implements Serializable {
 	private Long id;
 
 	@Column(nullable = false, length = 30)
-
 	private String fullName;
 
 	@Email(message = "Invalid email format")
@@ -56,18 +53,14 @@ public class UserEntity implements Serializable {
 	private String otp;
 
 	@Enumerated(EnumType.STRING)
-	
+
 	private Gender gender;
 
 	private String country;
 
 	private String state;
 
-	@OneToMany(
-	        mappedBy = "user",
-	        cascade = CascadeType.ALL,
-	        fetch = FetchType.LAZY
-	)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ExperianceEntity> experiance = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user")
@@ -114,7 +107,6 @@ public class UserEntity implements Serializable {
 		this.comment = comment;
 	}
 
-	
 	public String getPassword() {
 		return password;
 	}
@@ -178,6 +170,5 @@ public class UserEntity implements Serializable {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-	
 
 }

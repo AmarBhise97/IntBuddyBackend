@@ -27,6 +27,11 @@ public class AIController {
 
 	        return new AIResponse(reply);
 	    }
+	    
+	    @GetMapping("/models")
+	    public String models() {
+	        return aiService.getModels();
+	    }
 	
 
 }

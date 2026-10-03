@@ -29,24 +29,41 @@ public class ExperianceService {
 	
 	// Add experience
 
-	public ExperianceDTO addExperianceDTO(ExperianceEntity exp) throws DataisEmptyException {
+	// ===============================
+	// ADD EXPERIENCE
+	// ===============================
+	public ExperianceDTO addExperianceDTO(
+	        ExperianceEntity exp,
+	        Long userId
+	) throws DataisEmptyException {
 
-		if (exp.getUser() == null || exp.getUser().getId() == null) {
-			throw new DataisEmptyException("User ID is required");
-		}
+	    // Check user ID
+	    if (userId == null) {
 
-		Long userId = exp.getUser().getId();
+	        throw new DataisEmptyException(
+	                "User ID is required"
+	        );
+	    }
 
-		UserEntity user = userRepository.findById(userId)
-				.orElseThrow(() -> new DataisEmptyException("User not found with id: " + userId));
+	    // Find user
+	    UserEntity user =
+	            userRepository.findById(userId)
+	            .orElseThrow(() ->
+	                    new DataisEmptyException(
+	                            "User not found with id: "
+	                            + userId
+	                    )
+	            );
 
-		exp.setUser(user);
+	    // Set user
+	    exp.setUser(user);
 
-		ExperianceEntity saved = experianceRepo.save(exp);
+	    // Save experience
+	    ExperianceEntity saved =
+	            experianceRepo.save(exp);
 
-		return convertToDTO(saved);
+	    return convertToDTO(saved);
 	}
-
 	// AddExcetiance Convert to the DTO
 
 	public ExperianceDTO convertToDTO(ExperianceEntity exp) {
@@ -78,26 +95,63 @@ public class ExperianceService {
 
 	public Page<ExperianceDTO> getAllExperiance(Pageable pageable) {
 
-		return experianceRepo.findAll(pageable).map(experiance -> {
-			ExperianceDTO dto = new ExperianceDTO();
-			dto.setExperiance_ID(experiance.getExperiance_ID());
-			dto.setCompanyName(experiance.getCompanyName());
-			dto.setDate(experiance.getDate());
-			dto.setDetails(experiance.getDetails());
-			dto.setPosition(experiance.getPosition());
-			dto.setResult(experiance.isResult());
-			dto.setFullName(experiance.getUser().getFullName());
-			dto.setRole(experiance.getRole());
-			dto.setExperianceinyear(experiance.getExperianceinyear());
-			dto.setResumeName(experiance.getResumeName());
-			dto.setResumeType(experiance.getResumeType());
+	    return experianceRepo.findAll(pageable).map(experience -> {
 
-			if (experiance.getUser() != null) {
-				dto.setFullName(experiance.getUser().getFullName());
-			}
+	        ExperianceDTO dto = new ExperianceDTO();
 
-			return dto;
-		});
+	        dto.setExperiance_ID(
+	                experience.getExperiance_ID()
+	        );
+
+	        dto.setCompanyName(
+	                experience.getCompanyName()
+	        );
+
+	        dto.setPosition(
+	                experience.getPosition()
+	        );
+
+	        dto.setDate(
+	                experience.getDate()
+	        );
+
+	        dto.setDetails(
+	                experience.getDetails()
+	        );
+
+	        dto.setResult(
+	                experience.isResult()
+	        );
+
+	        dto.setRole(
+	                experience.getRole()
+	        );
+
+	        dto.setExperianceinyear(
+	                experience.getExperianceinyear()
+	        );
+
+	        dto.setResumeName(
+	                experience.getResumeName()
+	        );
+
+	        dto.setResumeType(
+	                experience.getResumeType()
+	        );
+
+
+	        // User null check
+	        if (experience.getUser() != null) {
+
+	            dto.setFullName(
+	                    experience.getUser().getFullName()
+	            );
+
+	        }
+
+
+	        return dto;
+	    });
 	}
 
 	// search by company name
