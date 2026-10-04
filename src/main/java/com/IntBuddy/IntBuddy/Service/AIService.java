@@ -75,3 +75,5 @@ public class AIService {
 
         return response.getBody();
     }
+
+}
