@@ -45,10 +45,6 @@ public class AIService {
         HttpEntity<Map<String, Object>> entity =
                 new HttpEntity<>(body, headers);
 
-        System.out.println("Groq URL = " + url);
-        System.out.println("API Key Present = " +
-                (apiKey != null && !apiKey.isBlank()));
-
         Map response =
                 restTemplate.postForObject(url, entity, Map.class);
 
